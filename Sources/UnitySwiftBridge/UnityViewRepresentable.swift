@@ -30,14 +30,14 @@ public struct UnityViewRepresentable: UIViewControllerRepresentable {
 
 public class UnityViewController: UIViewController {
 
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
 
         print("[UnityViewController] viewDidLoad")
     }
 
-    override func viewWillAppear(_ animated: Bool) {
+    public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         print("[UnityViewController] viewWillAppear")
 
@@ -45,7 +45,7 @@ public class UnityViewController: UIViewController {
         UnityManager.shared.resumeUnity()
     }
 
-    override func viewWillDisappear(_ animated: Bool) {
+    public override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         print("[UnityViewController] viewWillDisappear")
 
