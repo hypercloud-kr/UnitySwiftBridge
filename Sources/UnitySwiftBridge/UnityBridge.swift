@@ -55,7 +55,11 @@ public class UnityBridge: NSObject {
         // Dynamic method call: sendMessageToGOWithName:functionName:message:
         let selector = NSSelectorFromString("sendMessageToGOWithName:functionName:message:")
         if framework.responds(to: selector) {
-            framework.perform(selector, with: objectName, with: method, with: message)
+            // Use unsafeBitCast to call method with 3 arguments
+            let implementation = framework.method(for: selector)
+            typealias SendMessageFunction = @convention(c) (NSObject, Selector, NSString, NSString, NSString) -> Void
+            let function = unsafeBitCast(implementation, to: SendMessageFunction.self)
+            function(framework, selector, objectName as NSString, method as NSString, message as NSString)
         } else {
             print("[Swift->Unity] Error: UnityFramework doesn't respond to sendMessageToGOWithName")
         }
