@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UnitySwiftBridgeObjC
 
 /// Protocol for handling Unity callbacks
 public protocol UnityBridgeDelegate: AnyObject {
