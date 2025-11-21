@@ -23,9 +23,7 @@ let package = Package(
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         .target(
             name: "UnitySwiftBridge",
-            dependencies: [],
-            path: "Sources",
-            exclude: []
+            dependencies: []
         ),
     ]
 )
