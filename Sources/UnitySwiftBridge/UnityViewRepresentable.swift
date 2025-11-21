@@ -8,9 +8,11 @@
 import SwiftUI
 import UIKit
 
-struct UnityViewRepresentable: UIViewControllerRepresentable {
+public struct UnityViewRepresentable: UIViewControllerRepresentable {
 
-    func makeUIViewController(context: Context) -> UnityViewController {
+    public init() {}
+
+    public func makeUIViewController(context: Context) -> UnityViewController {
         let controller = UnityViewController()
 
         // Unity가 로드되면 표시
@@ -21,12 +23,12 @@ struct UnityViewRepresentable: UIViewControllerRepresentable {
         return controller
     }
 
-    func updateUIViewController(_ uiViewController: UnityViewController, context: Context) {
+    public func updateUIViewController(_ uiViewController: UnityViewController, context: Context) {
         // 업데이트 필요 없음
     }
 }
 
-class UnityViewController: UIViewController {
+public class UnityViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
