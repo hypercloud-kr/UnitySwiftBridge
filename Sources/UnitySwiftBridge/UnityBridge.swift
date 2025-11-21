@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import ObjectiveC
 
 /// Protocol for handling Unity callbacks
 public protocol UnityBridgeDelegate: AnyObject {
@@ -52,14 +53,12 @@ public class UnityBridge: NSObject {
 
         print("[Swift->Unity] Sending to \(objectName).\(method): \(message)")
 
-        // Dynamic method call: sendMessageToGOWithName:functionName:message:
+        // Use objc_msgSend for safe Objective-C method invocation
         let selector = NSSelectorFromString("sendMessageToGOWithName:functionName:message:")
         if framework.responds(to: selector) {
-            // Use unsafeBitCast to call method with 3 arguments
-            let implementation = framework.method(for: selector)
-            typealias SendMessageFunction = @convention(c) (NSObject, Selector, NSString, NSString, NSString) -> Void
-            let function = unsafeBitCast(implementation, to: SendMessageFunction.self)
-            function(framework, selector, objectName as NSString, method as NSString, message as NSString)
+            typealias SendMessageType = @convention(c) (AnyObject, Selector, NSString, NSString, NSString) -> Void
+            let method = unsafeBitCast(objc_msgSend, to: SendMessageType.self)
+            method(framework, selector, objectName as NSString, method as NSString, message as NSString)
         } else {
             print("[Swift->Unity] Error: UnityFramework doesn't respond to sendMessageToGOWithName")
         }
