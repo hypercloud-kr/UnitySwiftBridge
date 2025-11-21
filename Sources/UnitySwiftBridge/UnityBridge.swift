@@ -59,8 +59,8 @@ public class UnityBridge: NSObject {
             typealias SendMessageIMP = @convention(c) (AnyObject, Selector, NSString, NSString, NSString) -> Void
 
             // Get the method implementation
-            let method = class_getInstanceMethod(type(of: framework), selector)!
-            let imp = method_getImplementation(method)
+            let instanceMethod = class_getInstanceMethod(type(of: framework), selector)!
+            let imp = method_getImplementation(instanceMethod)
 
             // Cast to function type
             let function = unsafeBitCast(imp, to: SendMessageIMP.self)
