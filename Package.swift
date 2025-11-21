@@ -25,10 +25,7 @@ let package = Package(
             name: "UnitySwiftBridge",
             dependencies: [],
             path: "Sources",
-            exclude: [],
-            linkerSettings: [
-                .linkedFramework("UnityFramework")
-            ]
+            exclude: []
         ),
     ]
 )
