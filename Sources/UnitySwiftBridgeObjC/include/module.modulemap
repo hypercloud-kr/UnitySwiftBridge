@@ -1,0 +1,4 @@
+module UnitySwiftBridgeObjC {
+    header "UnityBridgeHelper.h"
+    export *
+}
