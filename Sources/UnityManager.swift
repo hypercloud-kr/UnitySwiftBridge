@@ -7,15 +7,20 @@
 
 import Foundation
 import UIKit
-import UnityFramework
 
-class UnityManager: NSObject {
+// Define UnityFrameworkListener protocol since we can't import UnityFramework
+@objc public protocol UnityFrameworkListener: AnyObject {
+    @objc optional func unityDidUnload(_ notification: Notification!)
+    @objc optional func unityDidQuit(_ notification: Notification!)
+}
+
+public class UnityManager: NSObject {
 
     // MARK: - Singleton
-    static let shared = UnityManager()
+    public static let shared = UnityManager()
 
     // MARK: - Properties
-    private var ufw: UnityFramework?
+    private var ufw: NSObject?
     private var isUnityLoaded = false
     private var isUnityRunning = false
 
@@ -26,7 +31,7 @@ class UnityManager: NSObject {
     // MARK: - Unity Lifecycle
 
     /// Load Unity Framework
-    func loadUnity() {
+    public func loadUnity() {
         guard !isUnityLoaded else {
             print("[UnityManager] Unity already loaded")
             return
@@ -50,7 +55,7 @@ class UnityManager: NSObject {
     }
 
     /// Show Unity window
-    func showUnity(inWindow window: UIWindow) {
+    public func showUnity(inWindow window: UIWindow) {
         guard let ufw = ufw else {
             print("[UnityManager] Error: Unity not loaded")
             return
@@ -64,32 +69,52 @@ class UnityManager: NSObject {
 
         print("[UnityManager] Starting Unity...")
 
-        // Show Unity
-        ufw.setDataBundleId("com.unity3d.framework")
-        ufw.register(self)
+        // Show Unity using dynamic method calls
+        let setDataBundleIdSelector = NSSelectorFromString("setDataBundleId:")
+        if ufw.responds(to: setDataBundleIdSelector) {
+            ufw.perform(setDataBundleIdSelector, with: "com.unity3d.framework")
+        }
 
-        ufw.runEmbedded(
-            withArgc: CommandLine.argc,
-            argv: CommandLine.unsafeArgv,
-            appLaunchOpts: nil
-        )
+        let registerSelector = NSSelectorFromString("registerFrameworkListener:")
+        if ufw.responds(to: registerSelector) {
+            ufw.perform(registerSelector, with: self)
+        }
+
+        // Call runEmbeddedWithArgc using NSInvocation for multiple parameters
+        let runEmbeddedSelector = NSSelectorFromString("runEmbeddedWithArgc:argv:appLaunchOpts:")
+        if ufw.responds(to: runEmbeddedSelector) {
+            let signature = ufw.method(for: runEmbeddedSelector)
+            typealias RunEmbeddedFunction = @convention(c) (AnyObject, Selector, Int32, UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?, NSDictionary?) -> Void
+            let function = unsafeBitCast(signature, to: RunEmbeddedFunction.self)
+            function(ufw, runEmbeddedSelector, CommandLine.argc, CommandLine.unsafeArgv, nil)
+        }
 
         isUnityRunning = true
         print("[UnityManager] Unity shown and running")
     }
 
     /// Pause Unity
-    func pauseUnity() {
-        ufw?.pause(true)
+    public func pauseUnity() {
+        guard let ufw = ufw else { return }
+
+        let selector = NSSelectorFromString("pause:")
+        if ufw.responds(to: selector) {
+            ufw.perform(selector, with: NSNumber(value: true))
+        }
     }
 
     /// Resume Unity
-    func resumeUnity() {
-        ufw?.pause(false)
+    public func resumeUnity() {
+        guard let ufw = ufw else { return }
+
+        let selector = NSSelectorFromString("pause:")
+        if ufw.responds(to: selector) {
+            ufw.perform(selector, with: NSNumber(value: false))
+        }
     }
 
     /// Show Unity if ready (for SwiftUI)
-    func showUnityIfReady() {
+    public func showUnityIfReady() {
         guard let ufw = ufw else {
             print("[UnityManager] Error: Unity not loaded")
             return
@@ -108,7 +133,7 @@ class UnityManager: NSObject {
     }
 
     /// Hide Unity window
-    func hideUnity() {
+    public func hideUnity() {
         print("[UnityManager] Hiding Unity window")
 
         // Unity window 찾아서 숨기기
@@ -127,7 +152,7 @@ class UnityManager: NSObject {
     }
 
     /// Show Unity window again
-    func showUnityWindow() {
+    public func showUnityWindow() {
         print("[UnityManager] Showing Unity window")
 
         // Unity window 찾아서 표시
@@ -147,10 +172,14 @@ class UnityManager: NSObject {
     }
 
     /// Unload Unity
-    func unloadUnity() {
+    public func unloadUnity() {
         guard let ufw = ufw else { return }
 
-        ufw.unloadApplication()
+        let selector = NSSelectorFromString("unloadApplication")
+        if ufw.responds(to: selector) {
+            ufw.perform(selector)
+        }
+
         isUnityLoaded = false
         self.ufw = nil
 
@@ -159,7 +188,7 @@ class UnityManager: NSObject {
 
     // MARK: - Unity Framework Loading
 
-    private func getUnityFramework() -> UnityFramework? {
+    private func getUnityFramework() -> NSObject? {
         let bundlePath = "\(Bundle.main.bundlePath)/Frameworks/UnityFramework.framework"
 
         guard let bundle = Bundle(path: bundlePath) else {
@@ -172,8 +201,24 @@ class UnityManager: NSObject {
             return nil
         }
 
-        guard let framework = bundle.principalClass?.getInstance() as? UnityFramework else {
-            print("[UnityManager] Error: Failed to get Unity framework instance")
+        // Get UnityFramework class dynamically
+        guard let principalClass = bundle.principalClass else {
+            print("[UnityManager] Error: No principal class found in Unity framework")
+            return nil
+        }
+
+        // Call getInstance() method dynamically
+        let getInstanceSelector = NSSelectorFromString("getInstance")
+        guard principalClass.responds(to: getInstanceSelector) else {
+            print("[UnityManager] Error: Principal class doesn't respond to getInstance")
+            return nil
+        }
+
+        let getInstance = principalClass.method(for: getInstanceSelector)
+        typealias GetInstanceFunction = @convention(c) (AnyObject, Selector) -> NSObject?
+        let function = unsafeBitCast(getInstance, to: GetInstanceFunction.self)
+        guard let framework = function(principalClass as AnyObject, getInstanceSelector) else {
+            print("[UnityManager] Error: getInstance returned nil")
             return nil
         }
 
@@ -226,13 +271,13 @@ class UnityManager: NSObject {
 
 extension UnityManager: UnityFrameworkListener {
 
-    func unityDidUnload(_ notification: Notification!) {
+    public func unityDidUnload(_ notification: Notification!) {
         print("[UnityManager] Unity did unload")
         isUnityLoaded = false
         ufw = nil
     }
 
-    func unityDidQuit(_ notification: Notification!) {
+    public func unityDidQuit(_ notification: Notification!) {
         print("[UnityManager] Unity did quit")
         isUnityLoaded = false
         ufw = nil
