@@ -1,218 +1,80 @@
-# UnitySwiftBridge
+# Unity Swift Bridge
 
-Unity Framework를 iOS 네이티브 앱에 통합하기 위한 Swift 브릿지 라이브러리
+A powerful Swift bridge library for seamless Unity Framework integration in iOS native applications.
 
-## 📋 개요
+[![Swift](https://img.shields.io/badge/Swift-5.5+-orange.svg)](https://swift.org)
+[![iOS](https://img.shields.io/badge/iOS-14.0+-blue.svg)](https://www.apple.com/ios/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-이 라이브러리는 Unity Framework와 iOS Swift 간의 양방향 통신을 제공합니다.
-- ✅ Swift → Unity 메시지 전송
-- ✅ Unity → Swift 콜백 수신
-- ✅ Unity 생명주기 관리
-- ✅ SwiftUI 지원
+## Features
 
-## 🚀 빠른 시작
+- **Bidirectional Communication**: Send messages between Swift and Unity seamlessly
+- **SwiftUI Support**: Modern UI framework integration with full support
+- **Lifecycle Management**: Complete control over Unity's lifecycle
+- **AR Foundation Ready**: Built-in AR session management and plane detection
+- **Type-Safe JSON Communication**: Structured data exchange between platforms
+- **Thread-Safe Operations**: Safe cross-thread communication handling
 
-### 필요 사항
+## Requirements
 
 - iOS 14.0+
 - Xcode 13.0+
 - Swift 5.5+
-- UnityFramework.framework (별도 제공)
+- Unity 2021.3+ (for framework generation)
 
-### 설치
+## Installation
 
-#### 파일 직접 추가
+### Manual Installation
 
-프로젝트에 다음 파일들을 추가:
+1. Copy the following files to your project:
 
-```swift
-Sources/
+```
+UnityBridge/
 ├── UnityManager.swift
 ├── UnityBridge.swift
 └── UnityViewRepresentable.swift
 ```
 
-#### 또는 Swift Package Manager
+2. Add UnityFramework.framework to your project (Embed & Sign)
+3. Configure your project settings (see [Integration Guide](./통합_가이드.md))
+
+### Swift Package Manager
+
+Coming soon...
+
+## Quick Start
+
+### 1. Initialize Unity in AppDelegate
 
 ```swift
-dependencies: [
-    .package(url: "https://github.com/yourname/UnitySwiftBridge", from: "1.0.0")
-]
-```
-
-### 기본 사용법
-
-```swift
-import UnitySwiftBridge
-
-// 1. Unity 로드 (AppDelegate에서)
-UnityManager.shared.loadUnity()
-
-// 2. Unity 시작
-if let window = UIApplication.shared.windows.first {
-    UnityManager.shared.showUnity(inWindow: window)
-}
-
-// 3. Unity에 메시지 전송
-UnityBridge.shared.sendMessage(
-    to: "iOSBridge",
-    method: "ReceiveJSONData",
-    message: "{\"command\":\"test\"}"
-)
-
-// 4. Unity로부터 메시지 받기
-class MyHandler: UnityBridgeDelegate {
-    func unityDidReceiveMessage(_ message: String) {
-        print("Received: \(message)")
-    }
-    // ... 다른 델리게이트 메서드
-}
-
-UnityBridge.shared.delegate = MyHandler()
-```
-
-## 📚 상세 문서
-
-- **[통합 가이드](./통합_가이드.md)** - 전체 통합 과정 상세 설명
-- **[API 문서](#api-문서)** - 클래스 및 메서드 레퍼런스
-
-## 🎯 주요 기능
-
-### UnityManager
-
-Unity의 생명주기를 관리합니다.
-
-```swift
-// Unity 로드
-UnityManager.shared.loadUnity()
-
-// Unity 시작
-UnityManager.shared.showUnity(inWindow: window)
-
-// Unity 숨기기
-UnityManager.shared.hideUnity()
-
-// Unity 일시정지/재개
-UnityManager.shared.pauseUnity()
-UnityManager.shared.resumeUnity()
-
-// Unity 언로드
-UnityManager.shared.unloadUnity()
-```
-
-### UnityBridge
-
-Swift와 Unity 간 양방향 통신을 제공합니다.
-
-```swift
-// 메시지 전송
-UnityBridge.shared.sendMessage(
-    to: "GameObject",
-    method: "MethodName",
-    message: "data"
-)
-
-// JSON 데이터 전송
-let data: [String: Any] = ["command": "test", "value": 123]
-UnityBridge.shared.sendJSONData(data)
-
-// 델리게이트 설정
-UnityBridge.shared.delegate = self
-```
-
-### UnityViewRepresentable
-
-SwiftUI에서 Unity를 표시합니다.
-
-```swift
-struct ContentView: View {
-    var body: some View {
-        UnityViewRepresentable()
-            .edgesIgnoringSafeArea(.all)
-    }
-}
-```
-
-## 📡 통신 프로토콜
-
-### Swift → Unity
-
-Unity의 `iOSBridge` GameObject로 메시지를 전송합니다.
-
-**사용 가능한 메서드:**
-- `ReceiveJSONData(string jsonData)` - JSON 데이터 수신
-- `StartARSession(string config)` - AR 세션 시작
-- `StopARSession(string dummy)` - AR 세션 정지
-- `ResetARSession(string dummy)` - AR 세션 리셋
-- `TogglePlaneDetection(string enabled)` - 평면 감지 토글
-
-### Unity → Swift
-
-Unity에서 네이티브 브릿지를 통해 Swift 델리게이트 메서드를 호출합니다.
-
-**UnityBridgeDelegate 메서드:**
-- `unityDidReceiveMessage(_ message: String)` - 일반 메시지
-- `unityARPlaneDetected(planeId:position:)` - AR 평면 감지
-- `unityARSessionStateChanged(_ state: String)` - AR 세션 상태
-- `unityReady()` - Unity 준비 완료
-- `unityRequestCloseView()` - Unity 닫기 요청
-
-## 🔧 요구사항
-
-### Xcode 프로젝트 설정
-
-1. **UnityFramework 추가** (Embed & Sign)
-2. **Data 폴더 추가** (folder reference)
-3. **Bridging Header 생성**
-4. **Build Settings 구성**
-   - Framework Search Paths
-   - Other Linker Flags: `-Wl,-U,_UnityReplayKitDelegate`
-   - Enable Bitcode: No
-
-상세 내용은 [통합 가이드](./통합_가이드.md)를 참고하세요.
-
-## 📱 SwiftUI 예제
-
-```swift
-import SwiftUI
-import UnitySwiftBridge
-
-@main
-struct MyApp: App {
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
-    }
-}
+import UIKit
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // Initialize Unity after app launch
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             UnityManager.shared.loadUnity()
         }
         return true
     }
 }
+```
+
+### 2. Display Unity View in SwiftUI
+
+```swift
+import SwiftUI
 
 struct ContentView: View {
     @State private var showUnity = false
-    @StateObject private var bridgeHandler = BridgeHandler()
 
     var body: some View {
-        VStack {
-            Button("Unity 시작") {
-                if let window = UIApplication.shared.windows.first {
-                    UnityManager.shared.showUnity(inWindow: window)
-                }
+        VStack(spacing: 20) {
+            Button("Launch Unity") {
                 showUnity = true
             }
-        }
-        .onAppear {
-            UnityBridge.shared.delegate = bridgeHandler
+            .buttonStyle(.borderedProminent)
         }
         .sheet(isPresented: $showUnity) {
             UnityViewRepresentable()
@@ -220,53 +82,227 @@ struct ContentView: View {
         }
     }
 }
+```
 
-class BridgeHandler: ObservableObject, UnityBridgeDelegate {
+### 3. Send Messages to Unity
+
+```swift
+// Send JSON data to Unity
+let data: [String: Any] = [
+    "command": "startGame",
+    "level": 1,
+    "playerName": "Swift User"
+]
+
+UnityBridge.shared.sendJSONData(data)
+
+// Or send direct messages
+UnityBridge.shared.sendMessage(
+    to: "GameController",
+    method: "LoadLevel",
+    message: "1"
+)
+```
+
+### 4. Receive Messages from Unity
+
+```swift
+class GameBridgeHandler: ObservableObject, UnityBridgeDelegate {
+    @Published var gameScore: Int = 0
+    @Published var gameState: String = "idle"
+
     func unityDidReceiveMessage(_ message: String) {
-        print("Message: \(message)")
-    }
+        // Parse Unity messages
+        if let data = message.data(using: .utf8),
+           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
 
-    func unityARPlaneDetected(planeId: String, position: (x: Float, y: Float, z: Float)) {
-        print("Plane: \(planeId)")
-    }
+            if let score = json["score"] as? Int {
+                DispatchQueue.main.async {
+                    self.gameScore = score
+                }
+            }
 
-    func unityARSessionStateChanged(_ state: String) {
-        print("State: \(state)")
+            if let state = json["state"] as? String {
+                DispatchQueue.main.async {
+                    self.gameState = state
+                }
+            }
+        }
     }
 
     func unityReady() {
-        print("Unity Ready")
+        print("Unity is ready for communication")
     }
 
     func unityRequestCloseView() {
-        print("Close requested")
+        // Handle Unity close request
     }
 }
 ```
 
-## ⚠️ 주의사항
+## API Reference
 
-1. **Unity 시작 타이밍**: Unity는 앱 시작 후 0.5초 이후에 로드하는 것을 권장합니다.
-2. **Window 관리**: Unity는 자체 UIWindow를 생성하므로 명시적으로 숨기기/표시하기를 관리해야 합니다.
-3. **스레드 안전성**: Unity 델리게이트 콜백에서 UI 업데이트 시 `DispatchQueue.main.async` 사용 필수.
-4. **실제 기기 테스트**: AR 기능은 시뮬레이터에서 작동하지 않습니다.
+### UnityManager
 
-## 🐛 문제 해결
+Singleton class managing Unity's lifecycle.
 
-### Unity가 시작되지 않음
-- UnityFramework가 Embed & Sign으로 설정되어 있는지 확인
-- Framework Search Paths 확인
+```swift
+// Load Unity Framework
+UnityManager.shared.loadUnity()
 
-### 통신이 작동하지 않음
-- Unity 씬에 "iOSBridge" GameObject가 있는지 확인
-- Delegate가 설정되어 있는지 확인
+// Show Unity in a window
+UnityManager.shared.showUnity(inWindow: window)
 
-자세한 내용은 [통합 가이드](./통합_가이드.md)의 문제 해결 섹션을 참고하세요.
+// Hide Unity view
+UnityManager.shared.hideUnity()
 
-## 📄 라이선스
+// Pause/Resume Unity
+UnityManager.shared.pauseUnity()
+UnityManager.shared.resumeUnity()
 
-MIT License - 자유롭게 사용하세요.
+// Unload Unity (cleanup)
+UnityManager.shared.unloadUnity()
+```
 
-## 🤝 기여
+### UnityBridge
 
-이슈 및 PR은 언제든 환영합니다!
+Handles bidirectional communication between Swift and Unity.
+
+```swift
+// Set delegate for receiving messages
+UnityBridge.shared.delegate = myDelegate
+
+// Send message to GameObject
+UnityBridge.shared.sendMessage(
+    to: "GameObject",      // Target GameObject name
+    method: "MethodName",  // Method to call
+    message: "data"        // String parameter
+)
+
+// Send JSON data
+UnityBridge.shared.sendJSONData(["key": "value"])
+
+// AR-specific commands
+UnityBridge.shared.startARSession(config: ["planeDetection": true])
+UnityBridge.shared.stopARSession()
+UnityBridge.shared.resetARSession()
+UnityBridge.shared.togglePlaneDetection(enabled: true)
+```
+
+### UnityBridgeDelegate
+
+Protocol for receiving Unity messages.
+
+```swift
+protocol UnityBridgeDelegate: AnyObject {
+    func unityDidReceiveMessage(_ message: String)
+    func unityARPlaneDetected(planeId: String, position: (x: Float, y: Float, z: Float))
+    func unityARSessionStateChanged(_ state: String)
+    func unityReady()
+    func unityRequestCloseView()
+}
+```
+
+## Communication Protocol
+
+### Swift → Unity
+
+Messages are sent to the `iOSBridge` GameObject in Unity. Available methods:
+
+- `ReceiveJSONData(string jsonData)` - Receive JSON data
+- `StartARSession(string config)` - Start AR session
+- `StopARSession(string dummy)` - Stop AR session
+- `ResetARSession(string dummy)` - Reset AR session
+- `TogglePlaneDetection(string enabled)` - Toggle plane detection
+
+### Unity → Swift
+
+Unity can call native iOS methods through the bridge:
+
+```csharp
+// In Unity C#
+[DllImport("__Internal")]
+private static extern void SendMessageToiOS(string message);
+
+// Send message to iOS
+SendMessageToiOS("{\"event\":\"gameComplete\",\"score\":100}");
+```
+
+## Project Configuration
+
+### Required Build Settings
+
+1. **Framework Search Paths**: `$(PROJECT_DIR)`
+2. **Other Linker Flags**: `-Wl,-U,_UnityReplayKitDelegate`
+3. **Enable Bitcode**: `No`
+4. **Always Embed Swift Standard Libraries**: `Yes`
+
+### Info.plist Additions
+
+```xml
+<key>io.unity3d.framework</key>
+<string>unity</string>
+<key>CADisableMinimumFrameDurationOnPhone</key>
+<true/>
+```
+
+## Example Projects
+
+Check out the `/IOS_Example` directory for a complete working example with:
+- SwiftUI integration
+- AR functionality
+- Bidirectional communication
+- State management
+
+## Best Practices
+
+1. **Initialization Timing**: Load Unity after app launch (0.5s delay recommended)
+2. **Thread Safety**: Always update UI on main thread when receiving Unity callbacks
+3. **Memory Management**: Properly unload Unity when not needed
+4. **Error Handling**: Implement proper error handling for Unity initialization failures
+5. **Testing**: Test on real devices for AR features
+
+## Troubleshooting
+
+### Unity doesn't start
+- Verify UnityFramework is properly embedded (Embed & Sign)
+- Check Framework Search Paths in Build Settings
+- Ensure Data folder is added as folder reference
+
+### Communication not working
+- Verify "iOSBridge" GameObject exists in Unity scene
+- Check delegate is properly set before sending messages
+- Ensure JSON format is correct for data exchange
+
+### AR features not working
+- Test on real device (simulator doesn't support AR)
+- Check camera permissions in Info.plist
+- Verify AR session configuration
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+For issues, questions, or suggestions, please open an issue on GitHub.
+
+## Acknowledgments
+
+- Unity Technologies for the Unity Framework
+- Apple for SwiftUI and ARKit
+- The iOS development community
+
+---
+
+Made with ❤️ by Hypercloud
