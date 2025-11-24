@@ -1,0 +1,31 @@
+# Xcode 프로젝트 설정
+
+## Build Settings에서 설정할 항목:
+
+### 1. Framework Search Paths
+$(PROJECT_DIR)
+
+### 2. Other Linker Flags
+-Wl,-U,_UnityReplayKitDelegate
+
+### 3. Enable Bitcode
+No
+
+### 4. Objective-C Bridging Header
+$(PROJECT_DIR)/ios-swift-Bridging-Header.h
+
+### 5. User Script Sandboxing (Build Script 에러 시)
+No
+
+## General 탭 설정:
+
+### Frameworks, Libraries, and Embedded Content
+- UnityFramework.framework → "Embed & Sign"
+
+### Deployment Info
+- iOS 14.0 이상
+
+## Signing & Capabilities:
+- Team 선택
+- Bundle Identifier 설정
+- Automatic Signing 권장

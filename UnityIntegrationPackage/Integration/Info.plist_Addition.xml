@@ -1,0 +1,19 @@
+<!-- Info.plist에 추가해야 할 내용 -->
+<!--
+사용 방법:
+1. Xcode에서 Info.plist 파일 열기
+2. 아래 키-값 쌍을 추가
+3. 또는 Source Code로 보기 후 </dict> 태그 직전에 추가
+-->
+
+<!-- 카메라 권한 (AR 기능 필수) -->
+<key>NSCameraUsageDescription</key>
+<string>AR 기능을 사용하기 위해 카메라 접근이 필요합니다</string>
+
+<!-- 선택 사항: 위치 권한 (AR 위치 기반 기능 사용 시) -->
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>AR 위치 기반 기능을 위해 위치 정보가 필요합니다</string>
+
+<!-- 선택 사항: 모션 사용 권한 -->
+<key>NSMotionUsageDescription</key>
+<string>AR 경험을 향상시키기 위해 모션 데이터가 필요합니다</string>
