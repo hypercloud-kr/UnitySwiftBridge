@@ -38,10 +38,6 @@ UnityBridge/
 2. UnityFramework.framework를 프로젝트에 추가 (Embed & Sign)
 3. 프로젝트 설정 구성 (자세한 내용은 [통합 가이드](./통합_가이드.md) 참조)
 
-### Swift Package Manager
-
-준비 중...
-
 ## 💡 빠른 시작
 
 ### 1. AppDelegate에서 Unity 초기화
